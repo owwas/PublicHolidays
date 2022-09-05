@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PublicHolidays.Core.Models;
 using PublicHolidays.Core.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,21 +10,32 @@ namespace PublicHolidays.Api.Controllers
     [ApiController]
     public class HolidayController : ControllerBase
     {
-        private readonly IHolidayService _holidaysApiService;
+        private readonly IHolidayService _holidayService;
 
-        public HolidayController(IHolidayService holidaysApiService)
+        public HolidayController(IHolidayService holidayService)
         {
-            _holidaysApiService = holidaysApiService;
+            _holidayService = holidayService;
         }
 
-        public async Task<ActionResult<IEnumerable<HolidayModel>>> Index(string countryCode, int year)
+        [HttpGet("GetCountryHolidaysByYear")]
+        public async Task<IActionResult> GetCountryHolidaysByYear(string countryCode, int year)
         {
-            List<HolidayModel> holidays = new List<HolidayModel>();
+            List<Holiday> holidays = new List<Holiday>();
 
             if (!string.IsNullOrEmpty(countryCode) && year > 0)
             {
-                holidays = await _holidaysApiService.GetHolidays(countryCode, year);
+                holidays = await _holidayService.GetAllHolidays(countryCode, year);
             }
+
+            return Ok(holidays);
+        }
+
+        [HttpGet("GetAllCountries")]
+        public async Task<IActionResult> GetAllCountries()
+        {
+            List<Country> holidays = new List<Country>();
+
+            holidays = await _holidayService.GetAllCountries();
 
             return Ok(holidays);
         }

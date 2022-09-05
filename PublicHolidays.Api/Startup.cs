@@ -1,15 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using PublicHolidays.Core.Services;
+using PublicHolidays.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PublicHolidays.Api
 {
@@ -28,7 +24,11 @@ namespace PublicHolidays.Api
             services.AddControllers();
             services.AddSwaggerDocument(configure => configure.Title = "Public Holidays API");
 
-            services.AddHttpClient("PublicHolidaysApi", c => c.BaseAddress = new Uri("https://kayaposoft.com/enrico"));
+            services.AddHttpClient("PublicHolidaysApi", c => c.BaseAddress = new Uri("https://kayaposoft.com"));
+
+            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IHolidayService, HolidayService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

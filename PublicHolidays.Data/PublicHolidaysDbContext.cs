@@ -6,8 +6,8 @@ namespace PublicHolidays.Data
 {
     public class PublicHolidaysDbContext : DbContext
     {
-        public DbSet<Music> Musics { get; set; }
-        public DbSet<Artist> Artists { get; set; }
+        //public DbSet<Music> Musics { get; set; }
+        public DbSet<Holiday> Holidays { get; set; }
 
         public PublicHolidaysDbContext(DbContextOptions<PublicHolidaysDbContext> options)
             : base(options)

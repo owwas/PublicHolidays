@@ -8,17 +8,16 @@ namespace PublicHolidays.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly PublicHolidaysDbContext _context;
-        private MusicRepository _musicRepository;
-        private HolidayRepository _artistRepository;
+        private HolidayRepository _holidayRepository;
 
         public UnitOfWork(PublicHolidaysDbContext context)
         {
             this._context = context;
         }
 
-        public IArtistRepository Artists => _artistRepository = _artistRepository ?? new HolidayRepository(_context);
+        public IHolidayRepository Holidays => _holidayRepository = _holidayRepository ?? new HolidayRepository(_context);
 
-        public IMusicRepository Musics => _musicRepository = _musicRepository ?? new MusicRepository(_context);
+        //public IMusicRepository Musics => _musicRepository = _musicRepository ?? new MusicRepository(_context);
 
         public async Task<int> CommitAsync()
         {
