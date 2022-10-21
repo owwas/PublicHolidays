@@ -8,11 +8,11 @@ namespace PublicHolidays.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HolidayController : ControllerBase
+    public class HolidaysController : ControllerBase
     {
         private readonly IHolidayService _holidayService;
 
-        public HolidayController(IHolidayService holidayService)
+        public HolidaysController(IHolidayService holidayService)
         {
             _holidayService = holidayService;
         }
@@ -30,14 +30,17 @@ namespace PublicHolidays.Api.Controllers
             return Ok(holidays);
         }
 
-        [HttpGet("GetAllCountries")]
-        public async Task<IActionResult> GetAllCountries()
+        [HttpGet("GetSpecificDayStatus")]
+        public async Task<IActionResult> GetSpecificDayStatus(string date, string countryCode)
         {
-            List<Country> holidays = new List<Country>();
+            string status = string.Empty;
+            if (!string.IsNullOrEmpty(countryCode))
+            {
+                status = await _holidayService.GetSpecificDayStatus(date, countryCode);
+            }
 
-            holidays = await _holidayService.GetAllCountries();
-
-            return Ok(holidays);
+            return Ok(status);
         }
+
     }
 }

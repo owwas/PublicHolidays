@@ -9,15 +9,16 @@ namespace PublicHolidays.Data
     {
         private readonly PublicHolidaysDbContext _context;
         private HolidayRepository _holidayRepository;
+        private CountryRepository _countryRepository;
 
         public UnitOfWork(PublicHolidaysDbContext context)
         {
             this._context = context;
         }
 
-        public IHolidayRepository Holidays => _holidayRepository = _holidayRepository ?? new HolidayRepository(_context);
+        public IHolidayRepository Holidays => _holidayRepository ??= new HolidayRepository(_context);
 
-        //public IMusicRepository Musics => _musicRepository = _musicRepository ?? new MusicRepository(_context);
+        public ICountryRepository Countries => _countryRepository ??= new CountryRepository(_context);
 
         public async Task<int> CommitAsync()
         {

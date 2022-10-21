@@ -7,6 +7,7 @@ namespace PublicHolidays.Core
     public interface IUnitOfWork : IDisposable
     {
         IHolidayRepository Holidays { get; }
+        ICountryRepository Countries { get; }
         Task<int> CommitAsync();
     }
 }

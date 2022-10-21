@@ -7,7 +7,8 @@ namespace PublicHolidays.Data
     public class PublicHolidaysDbContext : DbContext
     {
         //public DbSet<Music> Musics { get; set; }
-        public DbSet<Holiday> Holidays { get; set; }
+        //public DbSet<Holiday> Holidays { get; set; }
+        public DbSet<Country> Countries { get; set; }
 
         public PublicHolidaysDbContext(DbContextOptions<PublicHolidaysDbContext> options)
             : base(options)
@@ -15,8 +16,11 @@ namespace PublicHolidays.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            //builder
+            //    .ApplyConfiguration(new HolidayConfiguration());
+
             builder
-                .ApplyConfiguration(new HolidayConfiguration());
+                .ApplyConfiguration(new CountryConfiguration());
         }
     }
 }

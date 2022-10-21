@@ -3,6 +3,7 @@ using PublicHolidays.Core.Models;
 using PublicHolidays.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,24 +14,39 @@ namespace PublicHolidays.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly HttpClient client;
-        public HolidayService(IHttpClientFactory clientFactory)
+        public HolidayService(IHttpClientFactory clientFactory, IUnitOfWork unitOfWork)
         {
             client = clientFactory.CreateClient("PublicHolidaysApi");
+            _unitOfWork = unitOfWork;
         }
 
-        public Task<Holiday> CreateHoliday(Holiday newHoliday)
+        public async Task<IEnumerable<Holiday>> GetAllHolidays(string countryCode, int year)
         {
-            throw new NotImplementedException();
+            IEnumerable<Holiday> holidays = await _unitOfWork.Holidays.();
+
+            var url = string.Format($"/enrico/json/v2.0?action=getHolidaysForYear&year={year}&country={countryCode}");
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var stringResponse = await response.Content.ReadAsStringAsync();
+
+                holidays = JsonSerializer.Deserialize<IEnumerable<Holiday>>(stringResponse,
+                    new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+                var groupedHolidays = holidays.GroupBy(x => x.date.month).Select(x => x.ToList()).ToList();
+
+            }
+            else
+            {
+                throw new HttpRequestException(response.ReasonPhrase);
+            }
+
+            return holidays;
         }
 
-        public Task DeleteHoliday(Holiday artist)
+        public async Task<List<Holiday>> GetAllHoliday2(string countryCode, int year)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<Holiday>> GetAllHolidays(string countryCode, int year)
-        {
-            var url = string.Format($"/enrico/json/v2.0?action=getHolidaysForYear&year={year}&country={countryCode}&holidayType=public_holiday");
+            var url = string.Format($"/enrico/json/v2.0?action=getHolidaysForYear&year={year}&country={countryCode}");
             var response = await client.GetAsync(url);
             var result = new List<Holiday>();
             if (response.IsSuccessStatusCode)
@@ -39,68 +55,59 @@ namespace PublicHolidays.Services
 
                 result = JsonSerializer.Deserialize<List<Holiday>>(stringResponse,
                     new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
             }
             else
             {
                 throw new HttpRequestException(response.ReasonPhrase);
             }
 
+            var a = result.GroupBy(x => x.date.month).Select(x => x.ToList()).ToList();
+
+            List<Holiday> ac = result.OrderBy(x => x.date).ToList();
+
+            int count = 0;
+
+            for (int i = 0; i < ac.Count; i++)
+            {
+                var count2 = 0;
+                TimeSpan diff = (new DateTime(ac[i].date.year, ac[i].date.month, ac[i].date.day) - 
+                    new DateTime(ac[i].date.year, ac[i].date.month, ac[i].date.day));
+
+                if (diff.TotalDays == 1)
+                {
+                    count2 += 1;
+
+                    if (count < count2)
+                    {
+                        count = count2;
+                    }
+                }
+                else
+                {
+                    count2 = 0;
+                }
+            }
+
             return result;
         }
 
-        public Task<Holiday> GetHolidayById(int id)
+        public async Task<string> GetSpecificDayStatus(string date, string countryCode)
         {
-            throw new NotImplementedException();
-        }
+            var url = string.Format($"/enrico/json/v2.0?action=isPublicHoliday&date={date}&country={countryCode}");
+            HttpResponseMessage response = await client.GetAsync(url);
 
-        //public Task UpdateHoliday(Holiday artistToBeUpdated, Holiday artist)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public async Task<List<Holiday>> GetHolidays(string countryCode, int year)
-        //{
-        //    var url = string.Format("/api/v2/PublicHolidays/{0}/{1}", year, countryCode);
-        //    var result = new List<HolidayModel>();
-        //    var response = await client.GetAsync(url);
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var stringResponse = await response.Content.ReadAsStringAsync();
-
-        //        result = JsonSerializer.Deserialize<List<HolidayModel>>(stringResponse,
-        //            new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        //    }
-        //    else
-        //    {
-        //        throw new HttpRequestException(response.ReasonPhrase);
-        //    }
-
-        //    return result;
-        //}
-
-        public async Task<List<Country>> GetAllCountries()
-        {
-            var url = string.Format("/enrico/json/v2.0?action=getSupportedCountries");
-            var response = await client.GetAsync(url);
-            var result = new List<Country>();
+            string status = string.Empty;
             if (response.IsSuccessStatusCode)
             {
                 var stringResponse = await response.Content.ReadAsStringAsync();
-
-                result = JsonSerializer.Deserialize<List<Country>>(stringResponse,
-                    new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
             else
             {
                 throw new HttpRequestException(response.ReasonPhrase);
             }
 
-            return result;
-        }
-
-        public Task UpdateHoliday(Holiday artistToBeUpdated, Holiday artist)
-        {
-            throw new NotImplementedException();
+            return status;
         }
     }
 }

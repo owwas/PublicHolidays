@@ -6,11 +6,7 @@ namespace PublicHolidays.Core.Services
 {
     public interface IHolidayService
     {
-        Task<List<Holiday>> GetAllHolidays(string countryCode, int year);
-        Task<Holiday> GetHolidayById(int id);
-        Task<Holiday> CreateHoliday(Holiday newHoliday);
-        Task UpdateHoliday(Holiday artistToBeUpdated, Holiday artist);
-        Task DeleteHoliday(Holiday artist);
-        Task<List<Country>> GetAllCountries();
+        Task<IEnumerable<Holiday>> GetAllHolidays(string countryCode, int year);
+        Task<string> GetSpecificDayStatus(string date, string countryCode);
     }
 }
